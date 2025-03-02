@@ -1,0 +1,47 @@
+Power Graph
+from(bucket: "TELEMETRY_APP")
+  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) => r["_measurement"] == "powerMetrics")
+  |> filter(fn: (r) => r["_field"] == "ch3Current")
+  |> filter(fn: (r) => r["from"] == "2334424870" or r["from"] == "2564913731")
+  |> map(fn: (r) => ({r with _value: r._value * 0.000030}))
+  |> window(every: 1d, offset: 8h)
+  |> yield(name: "mean")
+
+
+Energy Graph
+from(bucket: "TELEMETRY_APP")
+  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) => r["_measurement"] == "powerMetrics")
+  |> filter(fn: (r) => r["_field"] == "ch3Current")
+  |> duplicate(column: "_value", as: "saveValue")
+  |> difference(keepFirst: true)
+  |> elapsed()
+  |> map(fn: (r) => ({r with energy: float(v: r.elapsed) * (-r._value + 2. * r.saveValue) / 2.}))
+  |> duplicate(column: "energy", as: "cumulativeEnergy")
+  |> window(every: 1d, offset: 8h)
+  |> cumulativeSum(columns: ["cumulativeEnergy"])
+// energy units currently are mA * 1V * 1sec = mWsec; Use a panel voltage of 30V;  to convert to kWhr * 1kW/1000000mw * 1hr/3600sec = 30*1kWhr/3600000000mWSec
+  |> map(fn: (r) => ({r with _value: r.cumulativeEnergy * 30. / 3600. / 1000000.}))
+
+
+Battery voltage
+from(bucket: "TELEMETRY_APP")
+  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) => r["_measurement"] == "deviceMetrics")
+  |> filter(fn: (r) => r["_field"] == "voltage")
+  |> filter(fn: (r) => r["from"] == "2564913731" or r["from"] == "2334424870")
+  |> aggregateWindow(every: 3h56m1ms, fn: mean, createEmpty: false)
+  |> yield(name: "mean")
+
+
+  Battery level
+  from(bucket: "TELEMETRY_APP")
+  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) => r["_measurement"] == "deviceMetrics")
+  |> filter(fn: (r) => r["_field"] == "batteryLevel")
+  |> filter(fn: (r) => r["from"] == "2334424870" or r["from"] == "2564913731")
+  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)
+  |> yield(name: "mean")
+
+

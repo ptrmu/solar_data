@@ -1,0 +1,717 @@
+[
+    {
+        "id": "a7585946a56e03bf",
+        "type": "tab",
+        "label": "Flow 3",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "8a6983d753b69881",
+        "type": "mqtt in",
+        "z": "a7585946a56e03bf",
+        "name": "",
+        "topic": "solardata/#",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "8c3750022e074c7a",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 100,
+        "y": 60,
+        "wires": [
+            [
+                "a2cb740c17141f6e",
+                "a7f0986487b3cc3b"
+            ]
+        ]
+    },
+    {
+        "id": "a7f0986487b3cc3b",
+        "type": "decode",
+        "z": "a7585946a56e03bf",
+        "name": "decode meshtastic protobuf",
+        "protofile": "ee4360a2313b8aad",
+        "protoType": "ServiceEnvelope",
+        "x": 200,
+        "y": 140,
+        "wires": [
+            [
+                "3a3e94c8e6f7225e",
+                "051eabfecbcd0913"
+            ]
+        ]
+    },
+    {
+        "id": "a2cb740c17141f6e",
+        "type": "debug",
+        "z": "a7585946a56e03bf",
+        "name": "debug 26",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 280,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "3a3e94c8e6f7225e",
+        "type": "debug",
+        "z": "a7585946a56e03bf",
+        "name": "debug 27",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 440,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "051eabfecbcd0913",
+        "type": "function",
+        "z": "a7585946a56e03bf",
+        "name": "extract app payload",
+        "func": "// Pick the parts from the mqtt envelope that are interesting\nlet to_decode = msg.payload.packet.decoded.payload\nlet new_msg = {\n    \"portnum\": msg.payload.packet.decoded.portnum,\n    \"payload\": {\n        \"original_payload\": msg.payload,\n        \"to_decode\": Buffer.from(to_decode, \"base64\")\n    }\n}\nreturn new_msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 210,
+        "y": 220,
+        "wires": [
+            [
+                "f2783bdc2f3b1ed7",
+                "744d288f33bfd674"
+            ]
+        ]
+    },
+    {
+        "id": "f2783bdc2f3b1ed7",
+        "type": "split",
+        "z": "a7585946a56e03bf",
+        "name": "",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "property": "payload",
+        "x": 210,
+        "y": 300,
+        "wires": [
+            [
+                "2d2a25933ee4f782",
+                "b0f8803ee64b21fc"
+            ]
+        ]
+    },
+    {
+        "id": "2d2a25933ee4f782",
+        "type": "debug",
+        "z": "a7585946a56e03bf",
+        "name": "debug 28",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 380,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "744d288f33bfd674",
+        "type": "debug",
+        "z": "a7585946a56e03bf",
+        "name": "debug 29",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 420,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "d6969f93bb7aa831",
+        "type": "switch",
+        "z": "a7585946a56e03bf",
+        "name": "select on portnum",
+        "property": "portnum",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "TELEMETRY_APP",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "NODEINFO_APP",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "POSITION_APP",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 4,
+        "x": 470,
+        "y": 460,
+        "wires": [
+            [
+                "4556fd9c0abd2437"
+            ],
+            [
+                "48e5a2d723abb7f7"
+            ],
+            [
+                "a30ece0b51a990e8"
+            ],
+            [
+                "fef525edfd3cf1e4"
+            ]
+        ]
+    },
+    {
+        "id": "4556fd9c0abd2437",
+        "type": "decode",
+        "z": "a7585946a56e03bf",
+        "name": "decode telemetry protobuf",
+        "protofile": "1d62696b2057e58b",
+        "protoType": "Telemetry",
+        "x": 750,
+        "y": 540,
+        "wires": [
+            [
+                "dd5ceca020da91cd"
+            ]
+        ]
+    },
+    {
+        "id": "48e5a2d723abb7f7",
+        "type": "decode",
+        "z": "a7585946a56e03bf",
+        "name": "decode nodeinfo protobuf",
+        "protofile": "7e28a7e2864f221f",
+        "protoType": "User",
+        "x": 750,
+        "y": 620,
+        "wires": [
+            [
+                "dd5ceca020da91cd"
+            ]
+        ]
+    },
+    {
+        "id": "a30ece0b51a990e8",
+        "type": "decode",
+        "z": "a7585946a56e03bf",
+        "name": "decode position protobuf",
+        "protofile": "7e28a7e2864f221f",
+        "protoType": "Position",
+        "x": 750,
+        "y": 700,
+        "wires": [
+            [
+                "dd5ceca020da91cd"
+            ]
+        ]
+    },
+    {
+        "id": "dd5ceca020da91cd",
+        "type": "join",
+        "z": "a7585946a56e03bf",
+        "name": "",
+        "mode": "auto",
+        "build": "object",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "useparts": false,
+        "accumulate": true,
+        "timeout": "",
+        "count": "",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 1030,
+        "y": 880,
+        "wires": [
+            [
+                "b6106e3fe24d2ebe",
+                "8ff3bedcb97818ab"
+            ]
+        ]
+    },
+    {
+        "id": "b0f8803ee64b21fc",
+        "type": "switch",
+        "z": "a7585946a56e03bf",
+        "name": "",
+        "property": "parts.key",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "to_decode",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 250,
+        "y": 380,
+        "wires": [
+            [
+                "d6969f93bb7aa831"
+            ],
+            [
+                "dd5ceca020da91cd"
+            ]
+        ]
+    },
+    {
+        "id": "b6106e3fe24d2ebe",
+        "type": "debug",
+        "z": "a7585946a56e03bf",
+        "name": "debug 30",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1200,
+        "y": 880,
+        "wires": []
+    },
+    {
+        "id": "8ff3bedcb97818ab",
+        "type": "function",
+        "z": "a7585946a56e03bf",
+        "name": "insert app payload",
+        "func": "// Pick the parts from the mqtt envelope that are interesting\nlet new_msg = {\n    \"portnum\": msg.portnum,\n    \"payload\": msg.payload.original_payload,\n}\nnew_msg.payload.packet.decoded.payload = msg.payload.to_decode\nreturn new_msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 210,
+        "y": 1020,
+        "wires": [
+            [
+                "99f95f24c04637dc",
+                "f8a47bef6e882cf8",
+                "b2f37d972ccdac70"
+            ]
+        ]
+    },
+    {
+        "id": "99f95f24c04637dc",
+        "type": "debug",
+        "z": "a7585946a56e03bf",
+        "name": "debug 31",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 420,
+        "y": 1020,
+        "wires": []
+    },
+    {
+        "id": "f8a47bef6e882cf8",
+        "type": "switch",
+        "z": "a7585946a56e03bf",
+        "name": "select on portnum",
+        "property": "portnum",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "TELEMETRY_APP",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "NODEINFO_APP",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "POSITION_APP",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 4,
+        "x": 250,
+        "y": 1280,
+        "wires": [
+            [
+                "1aaca93e157c582e"
+            ],
+            [
+                "550942e6552176df"
+            ],
+            [
+                "a2a8b16f68a1a66d"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "fef525edfd3cf1e4",
+        "type": "debug",
+        "z": "a7585946a56e03bf",
+        "name": "unparsed portnum",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 730,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "1aaca93e157c582e",
+        "type": "function",
+        "z": "a7585946a56e03bf",
+        "name": "flatten telemetry",
+        "func": "let measurement = \"unparsed\"\nlet fields;\nlet tags = {\n    \"from\": msg.payload.packet.from.toString(),\n};\nlet tp = msg.payload.packet.decoded.payload;\nif (tp.hasOwnProperty('environmentMetrics')) {\n    measurement = \"environmentMetrics\";\n    tags.bitfield = msg.payload.packet.decoded.bitfield;\n    fields = tp.environmentMetrics;\n} else if (tp.hasOwnProperty('deviceMetrics')) {\n    measurement = \"deviceMetrics\";\n    fields = tp.deviceMetrics;\n} else if (tp.hasOwnProperty('powerMetrics')) {\n    measurement = \"powerMetrics\";\n    fields = tp.powerMetrics;\n}\nif (fields !== undefined) {\n    fields.time = tp.time;\n    fields.packetId = msg.payload.packet.id;\n}\nlet new_msg = {\n    \"payload\": [{\n        \"measurement\": measurement,\n        \"fields\": fields,\n        \"tags\": tags,\n    }]\n};\nreturn new_msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 1300,
+        "wires": [
+            [
+                "52140de3c63a48e4",
+                "a6cf012f10e448d3"
+            ]
+        ]
+    },
+    {
+        "id": "52140de3c63a48e4",
+        "type": "debug",
+        "z": "a7585946a56e03bf",
+        "name": "store telemetry",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 740,
+        "y": 1300,
+        "wires": []
+    },
+    {
+        "id": "a6cf012f10e448d3",
+        "type": "influxdb batch",
+        "z": "a7585946a56e03bf",
+        "influxdb": "c65377a9fb08d0a9",
+        "precision": "",
+        "retentionPolicy": "",
+        "name": "LongFast!8c869c06 TELEMETRY_APP",
+        "database": "database",
+        "precisionV18FluxV20": "s",
+        "retentionPolicyV18Flux": "",
+        "org": "LongFast!8c869c06",
+        "bucket": "TELEMETRY_APP",
+        "x": 620,
+        "y": 1380,
+        "wires": []
+    },
+    {
+        "id": "550942e6552176df",
+        "type": "function",
+        "z": "a7585946a56e03bf",
+        "name": "Flatten nodeinfo",
+        "func": "let time = msg.payload.packet.rxTime;\nlet packetId = msg.payload.packet.id;\nmsg.payload = [\n    msg.payload.packet.decoded.payload,\n    {\n        \"from\": msg.payload.packet.from,\n    }];\nmsg.payload[0].time = time;\nmsg.payload[0].packetId = packetId;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 1460,
+        "wires": [
+            [
+                "a48626c620ba9f7c",
+                "fed7c02e3fc53673"
+            ]
+        ]
+    },
+    {
+        "id": "a48626c620ba9f7c",
+        "type": "debug",
+        "z": "a7585946a56e03bf",
+        "name": "store nodeinfo",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 740,
+        "y": 1460,
+        "wires": []
+    },
+    {
+        "id": "fed7c02e3fc53673",
+        "type": "influxdb out",
+        "z": "a7585946a56e03bf",
+        "influxdb": "c65377a9fb08d0a9",
+        "name": "LongFast!8c869c06 NODEINFO_APP",
+        "measurement": "nodeinfo",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "s",
+        "retentionPolicyV18Flux": "",
+        "org": "LongFast!8c869c06",
+        "bucket": "NODEINFO_APP",
+        "x": 610,
+        "y": 1540,
+        "wires": []
+    },
+    {
+        "id": "a2a8b16f68a1a66d",
+        "type": "function",
+        "z": "a7585946a56e03bf",
+        "name": "Flatten position",
+        "func": "let packetId = msg.payload.packet.id;\nmsg.payload = [\n    msg.payload.packet.decoded.payload,\n    {\n        \"from\": msg.payload.packet.from,\n        \"bitfield\": msg.payload.packet.decoded.bitfield,\n    }];\nmsg.payload[0].packetId = packetId;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 1620,
+        "wires": [
+            [
+                "d3af3fc913f56be3",
+                "6557a339c1335082"
+            ]
+        ]
+    },
+    {
+        "id": "d3af3fc913f56be3",
+        "type": "debug",
+        "z": "a7585946a56e03bf",
+        "name": "store position",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 730,
+        "y": 1620,
+        "wires": []
+    },
+    {
+        "id": "6557a339c1335082",
+        "type": "influxdb out",
+        "z": "a7585946a56e03bf",
+        "influxdb": "c65377a9fb08d0a9",
+        "name": "LongFast!8c869c06 POSITION_APP",
+        "measurement": "position",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "s",
+        "retentionPolicyV18Flux": "",
+        "org": "LongFast!8c869c06",
+        "bucket": "POSITION_APP",
+        "x": 610,
+        "y": 1700,
+        "wires": []
+    },
+    {
+        "id": "b2f37d972ccdac70",
+        "type": "function",
+        "z": "a7585946a56e03bf",
+        "name": "flatten packet",
+        "func": "let packet = msg.payload.packet;\nlet fromId = packet.from;\ndelete packet.from;\npacket.packetId = packet.id;\ndelete packet.id;\npacket.time = packet.rxTime;\npacket.portnum = msg.portnum;\ndelete packet.rxTime;\ndelete packet.decoded;\ndelete packet.to;\nmsg.payload = [\n    packet,\n    {\n        \"from\": fromId,\n    }];\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 490,
+        "y": 1100,
+        "wires": [
+            [
+                "654d9b2e180dbcc9",
+                "2d6c148fc473ab71"
+            ]
+        ]
+    },
+    {
+        "id": "654d9b2e180dbcc9",
+        "type": "influxdb out",
+        "z": "a7585946a56e03bf",
+        "influxdb": "c65377a9fb08d0a9",
+        "name": "LongFast!8c869c06 PACKET",
+        "measurement": "packet",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "s",
+        "retentionPolicyV18Flux": "",
+        "org": "LongFast!8c869c06",
+        "bucket": "PACKET",
+        "x": 580,
+        "y": 1180,
+        "wires": []
+    },
+    {
+        "id": "2d6c148fc473ab71",
+        "type": "debug",
+        "z": "a7585946a56e03bf",
+        "name": "store packet",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 710,
+        "y": 1100,
+        "wires": []
+    },
+    {
+        "id": "8c3750022e074c7a",
+        "type": "mqtt-broker",
+        "name": "Mosquitto on mypi",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "5",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "ee4360a2313b8aad",
+        "type": "protobuf-file",
+        "protopath": "/home/peter/Work/meshtastic/protobufs/meshtastic/mqtt.proto,/home/peter/Work/meshtastic/protobufs/meshtastic/mesh.proto,/home/peter/Work/meshtastic/protobufs/meshtastic/portnums.proto",
+        "watchFile": true,
+        "keepCase": false
+    },
+    {
+        "id": "1d62696b2057e58b",
+        "type": "protobuf-file",
+        "protopath": "/home/peter/Work/meshtastic/protobufs/meshtastic/telemetry.proto",
+        "watchFile": true,
+        "keepCase": false
+    },
+    {
+        "id": "7e28a7e2864f221f",
+        "type": "protobuf-file",
+        "protopath": "/home/peter/Work/meshtastic/protobufs/meshtastic/mesh.proto,/home/peter/Work/meshtastic/protobufs/meshtastic/config.proto",
+        "watchFile": true,
+        "keepCase": false
+    },
+    {
+        "id": "c65377a9fb08d0a9",
+        "type": "influxdb",
+        "hostname": "127.0.0.1",
+        "port": "8086",
+        "protocol": "http",
+        "database": "database",
+        "name": "LongFast!8c869c06",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "2.0",
+        "url": "http://localhost:8086",
+        "timeout": "10",
+        "rejectUnauthorized": true
+    }
+]
