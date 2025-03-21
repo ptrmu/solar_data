@@ -1,0 +1,310 @@
+[
+    {
+        "id": "14ffaeb2542cea31",
+        "type": "tab",
+        "label": "Flow 4",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "13494e1aeab662eb",
+        "type": "mqtt in",
+        "z": "14ffaeb2542cea31",
+        "name": "",
+        "topic": "solardata/2/e/LongFast/!404476bc",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "8c3750022e074c7a",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 280,
+        "y": 100,
+        "wires": [
+            [
+                "20844938160e5c07",
+                "c708af1156731d93"
+            ]
+        ]
+    },
+    {
+        "id": "20844938160e5c07",
+        "type": "debug",
+        "z": "14ffaeb2542cea31",
+        "name": "debug 34",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 540,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "3c6c84be990bcafe",
+        "type": "debug",
+        "z": "14ffaeb2542cea31",
+        "name": "debug 35",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 540,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "c708af1156731d93",
+        "type": "decode",
+        "z": "14ffaeb2542cea31",
+        "name": "decode meshtastic protobuf",
+        "protofile": "ee4360a2313b8aad",
+        "protoType": "ServiceEnvelope",
+        "x": 300,
+        "y": 180,
+        "wires": [
+            [
+                "3c6c84be990bcafe",
+                "de5fe97130b07c5c"
+            ]
+        ]
+    },
+    {
+        "id": "de5fe97130b07c5c",
+        "type": "switch",
+        "z": "14ffaeb2542cea31",
+        "name": "",
+        "property": "payload.packet.decoded.portnum",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "TELEMETRY_APP",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 290,
+        "y": 260,
+        "wires": [
+            [
+                "975b53646a3f2216",
+                "cd19caf5ce52a3d5"
+            ]
+        ]
+    },
+    {
+        "id": "975b53646a3f2216",
+        "type": "debug",
+        "z": "14ffaeb2542cea31",
+        "name": "debug 36",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 460,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "fa42a56b147509b9",
+        "type": "function",
+        "z": "14ffaeb2542cea31",
+        "name": "flatten telemetry",
+        "func": "let measurement = \"unparsed\"\nlet fields;\nlet tags = {\n    \"from\": msg.payload_save.packet.from.toString(),\n};\nlet tp = msg.payload;\nif (tp.hasOwnProperty('environmentMetrics')) {\n    measurement = \"environment\";\n    tags.bitfield = msg.payload_save.packet.decoded.bitfield;\n    fields = tp.environmentMetrics;\n} else if (tp.hasOwnProperty('deviceMetrics')) {\n    measurement = \"device\";\n    fields = tp.deviceMetrics;\n} else if (tp.hasOwnProperty('powerMetrics')) {\n    measurement = \"power\";\n    fields = tp.powerMetrics;\n}\nif (fields !== undefined) {\n    fields.time = tp.time;\n    fields.rxSnr = msg.payload_save.packet.rxSnr;\n    fields.rxRssi = msg.payload_save.packet.rxRssi;\n}\nif (fields.time < 10000000) {\n    fields.time = msg.payload_save.packet.rxTime;\n}\nlet new_msg = {\n    \"payload\": [{\n        \"measurement\": measurement,\n        \"fields\": fields,\n        \"tags\": tags,\n    }]\n};\nreturn new_msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 500,
+        "wires": [
+            [
+                "5d912a58b164d4e3",
+                "59ea2116aa724f99"
+            ]
+        ]
+    },
+    {
+        "id": "5d912a58b164d4e3",
+        "type": "debug",
+        "z": "14ffaeb2542cea31",
+        "name": "store telemetry",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 660,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "51fa2a14065154fd",
+        "type": "decode",
+        "z": "14ffaeb2542cea31",
+        "name": "decode telemetry protobuf",
+        "protofile": "1d62696b2057e58b",
+        "protoType": "Telemetry",
+        "x": 430,
+        "y": 420,
+        "wires": [
+            [
+                "d576981304950ac4",
+                "fa42a56b147509b9"
+            ]
+        ]
+    },
+    {
+        "id": "d576981304950ac4",
+        "type": "debug",
+        "z": "14ffaeb2542cea31",
+        "name": "debug 37",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 660,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "cd19caf5ce52a3d5",
+        "type": "function",
+        "z": "14ffaeb2542cea31",
+        "name": "extract app payload",
+        "func": "let to_decode = msg.payload.packet.decoded.payload;\nreturn {\n    \"payload\": Buffer.from(to_decode, \"base64\"),\n    \"payload_save\": msg.payload\n    };",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 340,
+        "wires": [
+            [
+                "f0269f2f5a4a885b",
+                "51fa2a14065154fd"
+            ]
+        ]
+    },
+    {
+        "id": "f0269f2f5a4a885b",
+        "type": "debug",
+        "z": "14ffaeb2542cea31",
+        "name": "debug 38",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 580,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "59ea2116aa724f99",
+        "type": "influxdb batch",
+        "z": "14ffaeb2542cea31",
+        "influxdb": "a715881760558b55",
+        "precision": "",
+        "retentionPolicy": "",
+        "name": "SolarMetrics PanelRadios",
+        "database": "database",
+        "precisionV18FluxV20": "s",
+        "retentionPolicyV18Flux": "",
+        "org": "SolarMetrics",
+        "bucket": "PanelRadios",
+        "x": 510,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "8c3750022e074c7a",
+        "type": "mqtt-broker",
+        "name": "Mosquitto on mypi",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "5",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "ee4360a2313b8aad",
+        "type": "protobuf-file",
+        "protopath": "/home/peter/Work/meshtastic/protobufs/meshtastic/mqtt.proto,/home/peter/Work/meshtastic/protobufs/meshtastic/mesh.proto,/home/peter/Work/meshtastic/protobufs/meshtastic/portnums.proto",
+        "watchFile": true,
+        "keepCase": false
+    },
+    {
+        "id": "1d62696b2057e58b",
+        "type": "protobuf-file",
+        "protopath": "/home/peter/Work/meshtastic/protobufs/meshtastic/telemetry.proto",
+        "watchFile": true,
+        "keepCase": false
+    },
+    {
+        "id": "a715881760558b55",
+        "type": "influxdb",
+        "hostname": "127.0.0.1",
+        "port": "8086",
+        "protocol": "http",
+        "database": "database",
+        "name": "SolarMetrics",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "2.0",
+        "url": "http://localhost:8086",
+        "timeout": "10",
+        "rejectUnauthorized": true
+    }
+]

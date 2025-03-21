@@ -12,7 +12,7 @@
         "type": "mqtt in",
         "z": "a7585946a56e03bf",
         "name": "",
-        "topic": "solardata/#",
+        "topic": "solardata/2/e/LongFast/!8c869c06",
         "qos": "2",
         "datatype": "auto-detect",
         "broker": "8c3750022e074c7a",
@@ -20,7 +20,7 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 100,
+        "x": 180,
         "y": 60,
         "wires": [
             [
@@ -142,7 +142,7 @@
         "type": "debug",
         "z": "a7585946a56e03bf",
         "name": "debug 29",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -188,7 +188,8 @@
         "y": 460,
         "wires": [
             [
-                "4556fd9c0abd2437"
+                "4556fd9c0abd2437",
+                "ac2ff5c0a2116bef"
             ],
             [
                 "48e5a2d723abb7f7"
@@ -645,6 +646,22 @@
         "statusType": "auto",
         "x": 710,
         "y": 1100,
+        "wires": []
+    },
+    {
+        "id": "ac2ff5c0a2116bef",
+        "type": "debug",
+        "z": "a7585946a56e03bf",
+        "name": "debug 39",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 700,
+        "y": 420,
         "wires": []
     },
     {
